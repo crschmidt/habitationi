@@ -191,6 +191,8 @@ def guess_lot_size(row):
     if lot_size and row['property_class'] != "CONDO-BLDG":
         if gis_lot_size and lot_size/gis_lot_size < .8: # Use GIS data if it's significantly larger than lot size, to be conservative.
             return gis_lot_size
+        if gis_lot_size < (.6 * lot_size):
+            return gis_lot_size
         return lot_size
     return 0
 
