@@ -328,22 +328,25 @@ def conforming(row):
             'SD-14': .3,
     }
     heights = {}
-    for i in ['A-1', 'A-2', 'B', 'C', 'C-1', 'O-1', 'BA-1', 'BA-3', 'IB-2', 'OS', 'SD-2', 'SD-9', 'SD-10F', 'SD-10H']:
+    for i in ['A-1', 'A-2', 'B', 'C', 'C-1', 'O-1', 'BA-1', 'BA-3', 'IB-2', 'OS', 'SD-2', 'SD-9', 'SD-10F', 'SD-10H', 'OS']:
         heights[i] = 35
     for i in ['C-1A', 'C-2B', 'BA-2', 'BB-2', 'IA-1', 'IC']:
         heights[i] = 45
     for i in ['C-2A', 'SD-4', 'SD-4A', 'SD-8', 'SD-8A']:
         heights[i] = 60
+    for i in ['O-2A', 'IB-1', 'IA-2', 'SD-3']:    
+        heights[i] = 70
     for i in ['BB', 'SD-7']:
         heights[i] = 80
-    for i in ['C-2', 'SD-5', 'SD-11']:
+    for i in ['C-2', 'O-2', 'SD-5', 'SD-11']:
         heights[i] = 85
+    for i in ['BB-1', 'SD-13']:
+        heights[i] = 90
     for i in ['C-3', 'C-3A', 'C-3B', 'O-3', 'O-3A', 'IB', 'SD-1', 'SD-15']:
         heights[i] = 120
     heights['SD-14'] = 55    
     heights['SD-12'] = 65
     heights['SD-3'] = 70    
-    heights['SD-13'] = 90 
     heights['SD-6'] = 100 
 
     lot_size = guess_lot_size(row)
