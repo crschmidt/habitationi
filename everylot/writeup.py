@@ -230,6 +230,7 @@ def conforming(row):
             'IA': 1.5,
             'IB-1': 3.0,
             'IB-2': 0.75,
+            'IB': 4.0,
             'O-1': .75,
             'O-2': 2.0,
             'O-2A': 1.5,
@@ -242,6 +243,13 @@ def conforming(row):
             'SD-6': 3.0,
             'SD-7': 3.0,
             'SD-8': 1.75,
+            'SD-9': .6,
+            'SD-10F': .6,
+            'SD-10H': .6,
+            'SD-11': 1.7,
+            'SD-12': 1.0,
+            'SD-13': 1.5,
+            'SD-15': 3.5,
             }
     lot_area = {
             'C': 1800,
@@ -277,6 +285,12 @@ def conforming(row):
             'SD-6': 300,
             'SD-7': 300,
             'SD-8': 650,
+            'SD-9': 1800,
+            'SD-10F': 1800,
+            'SD-10H': 1800,
+            'SD-11': 600,
+            'SD-13': 600,
+            'SD-14': 800,
         }
     openspace = {
             'A-1': .5,
@@ -306,21 +320,30 @@ def conforming(row):
             'SD-6': .1,
             'SD-8A': .15,
             'SD-9': .36,
+            'SD-10F': .36,
+            'SD-10H': .36,
+            'SD-11': .15,
+            'SD-12': .15,
+            'SD-13': .15,
+            'SD-14': .3,
     }
     heights = {}
-    for i in ['A-1', 'A-2', 'B', 'C', 'C-1', 'O-1', 'BA-1', 'BA-3', 'IB-2', 'OS', 'SD-2', 'SD-9']:
+    for i in ['A-1', 'A-2', 'B', 'C', 'C-1', 'O-1', 'BA-1', 'BA-3', 'IB-2', 'OS', 'SD-2', 'SD-9', 'SD-10F', 'SD-10H']:
         heights[i] = 35
     for i in ['C-1A', 'C-2B', 'BA-2', 'BB-2', 'IA-1', 'IC']:
         heights[i] = 45
     for i in ['C-2A', 'SD-4', 'SD-4A', 'SD-8', 'SD-8A']:
         heights[i] = 60
-    for i in ['C-2', 'SD-5']:
-        heights[i] = 85
-    for i in ['C-3', 'C-3A', 'C-3B', 'O-3', 'O-3A', 'IB', 'SD-1']:
-        heights[i] = 120
     for i in ['BB', 'SD-7']:
         heights[i] = 80
+    for i in ['C-2', 'SD-5', 'SD-11']:
+        heights[i] = 85
+    for i in ['C-3', 'C-3A', 'C-3B', 'O-3', 'O-3A', 'IB', 'SD-1', 'SD-15']:
+        heights[i] = 120
+    heights['SD-14'] = 55    
+    heights['SD-12'] = 65
     heights['SD-3'] = 70    
+    heights['SD-13'] = 90 
     heights['SD-6'] = 100 
 
     lot_size = guess_lot_size(row)
