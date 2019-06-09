@@ -14,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import sqlite3
+import urllib
 
 residential_classes = [
         'SNGL-FAM-RES',
@@ -183,10 +185,13 @@ def guess_units(row):
         return int(row['units'])
 
 def guess_lot_size(row):
-    if row['gis_lot_size'] and row['property_class'] == "CONDO-BLDG":
-        return float(row['gis_lot_size'])
-    if row['lot_size'] and row['property_class'] != "CONDO-BLDG":
-        return float(row['lot_size'])
+    lot_size, gis_lot_size = float(row.get('lot_size', 0) or 0), float(row.get('gis_lot_size', 0) or 0)
+    if gis_lot_size and row['property_class'] == "CONDO-BLDG":
+        return gis_lot_size
+    if lot_size and row['property_class'] != "CONDO-BLDG":
+        if gis_lot_size and lot_size/gis_lot_size < .8: # Use GIS data if it's significantly larger than lot size, to be conservative.
+            return gis_lot_size
+        return lot_size
     return 0
 
 def conforming(row):
@@ -199,13 +204,13 @@ def conforming(row):
         types[i] = residential_classes
         
     far = {
-            'C': .6,
-            'C-1': .75,
             'A-1': .5,
             'A-2': .5,
             'B': .5,
-            'C-2': 1.75,
+            'C': .6,
+            'C-1': .75,
             'C-1A': 1.25,
+            'C-2': 1.75,
             'C-2A': 2.50,
             'C-2B': 1.75,
             'C-3': 3.0,
@@ -230,6 +235,13 @@ def conforming(row):
             'O-2A': 1.5,
             'O-3': 3.0,
             '0-3A': 3.0,
+            'SD-1': 3.0,
+            'SD-2': .5,
+            'SD-4A': 1.5,
+            'SD-5': 1.25,
+            'SD-6': 3.0,
+            'SD-7': 3.0,
+            'SD-8': 1.75,
             }
     lot_area = {
             'C': 1800,
@@ -244,6 +256,7 @@ def conforming(row):
             'C-3': 300,
             'C-3A': 300,
             'C-3B': 300,
+            'O-2':600,
             'BA': 600,
             'BA-1': 1200,
             'BA-2': 600,
@@ -255,6 +268,15 @@ def conforming(row):
             'BC-1': 450,
             'IA-1': 700,
             'IB-2': 1200,
+            'SD-1': 300,
+            'SD-2': 2500,
+            'SD-3': 2500,
+            'SD-4': 600,
+            'SD-4A': 600,
+            'SD-5': 600,
+            'SD-6': 300,
+            'SD-7': 300,
+            'SD-8': 650,
         }
     openspace = {
             'A-1': .5,
@@ -277,16 +299,29 @@ def conforming(row):
             'BB-1': .15,
             'BB-2': .15,
             'IB-2': .15,
+            'SD-2': .4,
+            'SD-4': .15,
+            'SD-4A': .15,
+            'SD-5': .15,
+            'SD-6': .1,
+            'SD-8A': .15,
+            'SD-9': .36,
     }
     heights = {}
-    for i in ['A-1', 'A-2', 'B', 'C', 'C-1', 'O-1', 'BA-1', 'BA-3', 'IB-2', 'OS']:
+    for i in ['A-1', 'A-2', 'B', 'C', 'C-1', 'O-1', 'BA-1', 'BA-3', 'IB-2', 'OS', 'SD-2', 'SD-9']:
         heights[i] = 35
     for i in ['C-1A', 'C-2B', 'BA-2', 'BB-2', 'IA-1', 'IC']:
         heights[i] = 45
-    heights['C-2A'] = 60
-    heights['C-2'] = 85
-    for i in ['C-3', 'C-3A', 'C-3B', 'O-3', 'O-3A', 'IB']:
+    for i in ['C-2A', 'SD-4', 'SD-4A', 'SD-8', 'SD-8A']:
+        heights[i] = 60
+    for i in ['C-2', 'SD-5']:
+        heights[i] = 85
+    for i in ['C-3', 'C-3A', 'C-3B', 'O-3', 'O-3A', 'IB', 'SD-1']:
         heights[i] = 120
+    for i in ['BB', 'SD-7']:
+        heights[i] = 80
+    heights['SD-3'] = 70    
+    heights['SD-6'] = 100 
 
     lot_size = guess_lot_size(row)
 
@@ -294,8 +329,6 @@ def conforming(row):
 
     units = guess_units(row)
     non_conforming = []
-
-    
 
     if row['living_size'] and lot_size and zone in far:
         prop_far = float(row['living_size']) / float(lot_size)
@@ -308,7 +341,7 @@ def conforming(row):
         sf_unit = float(lot_size) / units
         if  sf_unit < lot_area[zone]:
             non_conforming.append("lot size/unit")
-    if row['height'] and zone in heights and row['height'] > heights[zone] * 1.2:
+    if row['height'] and zone in heights and row['height'] > heights[zone] * 1.2 and approx_height(row) != -1:
         non_conforming.append("height")
     if lot_size and row['building_area']:
         non_open = float(row['building_area'])
@@ -329,6 +362,16 @@ def conforming(row):
         return "Non-conforming (%s)." % (", ".join(non_conforming))
     return ""
 
+def approx_height(row):
+    height_approx = 0
+    if row['story_height']:
+        height_approx = int(float(row['num_stories']) * int(row['story_height']))
+        if row['height']:
+            height = float(row['height'])
+            if height/height_approx > 4 or height/height_approx < .4:
+                return -1
+    return height_approx
+
 def write_row(row):
     text = []
     zone = row.get('zone', '')
@@ -342,14 +385,16 @@ def write_row(row):
     if row['year_built'] and int(row['year_built']) != 0:
         text.append("Built %s." % (row['year_built']))
     if single_building and row['num_stories'] and float(row['num_stories']):
-        story_text = "%s stories" % row['num_stories']
-        if float(row['num_stories']) == 1:
-            story_text = "1 story"
-
-        if row['story_height']:
-            text.append("%s; ~%s ft tall." % (story_text, int(float(row['num_stories']) * int(row['story_height']))))
-        else:
-            text.append("%s." % story_text) 
+        h = approx_height(row)
+        if h != -1:
+            story_text = "%s stories" % row['num_stories']
+            if float(row['num_stories']) == 1:
+                story_text = "1 story"
+    
+            if row['story_height']:
+                text.append("%s; ~%s ft tall." % (story_text, h))
+            else:
+                text.append("%s." % story_text) 
     if single_building and row['units'] >= 3:
         text.append("%s units." % row['units'])
     if single_building and row['living_size']:
@@ -375,14 +420,17 @@ def write_row(row):
     conforms = conforming(row)    
     if conforms:
         text.append(conforms)
+    #print ",".join([str(row['gisid']),str(conforms and 1 or 0)])    
     if zone in special_zones:
         text.append("%s." % (special_zones[zone]))
     #text.append(row['prop_id'])
+    gmaps_link = "https://www.google.com/maps/search/?api=1&query=%s" % urllib.quote("%s, Cambridge, MA" % row['address'])
+    text.append(gmaps_link)
     text.append("https://www.cambridgema.gov/propertydatabase/%s" % row['prop_id'])    
     #print " ".join(text)   
     t = " ".join(text)
-    while len(t) > 306: # Hack for entries which are too long.
-        text.pop(-3)
+    while len(t) > 284 + len(gmaps_link): # Hack for entries which are too long.
+        text.pop(-4)
         t = " ".join(text)   
     return t
     
