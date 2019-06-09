@@ -17,16 +17,20 @@ import sqlite3
 zone_setback = {
         'A-1': 15,
         'A-2': 10,
-        'B': 7.5,
-        'C': 7.5,
         'C-1': {'height': "{h}/5", 'min': 7.5},
         'C-1A': {'height': "{h}/7", 'max': 10},
-        'BA-2': 5
+        'SD-14': {'height': "{h}/7", 'max': 10},
+        'SD-8A': {'height': "{h}/7", 'max': 10},
+        'BA-2': 5,
+        'SD-13': 5,
 }
 
-for i in ['C-2', 'C-2B', 'O-1', 'O-2', 'O-2A', 'BA-3']:
+for i in ['B', 'C', 'SD-2', 'SD-9', 'SD-10F', 'SD-10H']:
+    zone_setback[i] = 7.5
+
+for i in ['C-2', 'C-2B', 'O-1', 'O-2', 'O-2A', 'BA-3', 'SD-4', 'SD-4A', 'SD-5', 'SD-11', 'SD-12']:
     zone_setback[i] = {'height':"{h}/5"}
-for i in ['C-3', 'C-3A', 'C-2A', 'O-3', 'O-3A']:
+for i in ['C-3', 'C-3A', 'C-2A', 'O-3', 'O-3A', 'SD-6']:
     zone_setback[i] = {'height':"{h}/6"}
 
 def compute_setback(zone, height):
