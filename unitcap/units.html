@@ -1,0 +1,39 @@
+
+
+<table width="50%">
+	<tr>
+		<th width="30%">
+			Zone
+		</th>
+		<th width="30%">
+			Floor Area Ratio Cap
+		</th>
+		<th width="30%">
+			Unit size/dwelling Cap
+		</th>
+	</tr>
+<tr><td>A-1</td><td>0.5</td><td>6000</td></tr>
+<tr><td>A-2</td><td>0.5</td><td>4500</td></tr>
+<tr><td>B</td><td>0.5</td><td>2500</td></tr>
+<tr><td>C</td><td>0.6</td><td>1800</td></tr>
+<tr><td>C-1</td><td>0.75</td><td>1500</td></tr>
+<tr><td>C-1A</td><td>1.25</td><td>1000</td></tr>
+<tr><td>C-2</td><td>1.75</td><td>600</td></tr>
+<tr><td>C-2A</td><td>2.5</td><td>300</td></tr>
+<tr><td>C-2B</td><td>1.75</td><td>600</td></tr>
+<tr><td>C-3</td><td>3.0</td><td>300</td></tr>
+<tr><td>C-3A</td><td>3.0</td><td>300</td></tr>
+<tr><td>C-3B</td><td>3.0</td><td>300</td></tr>
+</table>
+
+Number of limits allowed: 
+
+<hr />
+
+<form>
+	Multiply FAR By: <input type="text" value="1.0" name="far_factor" size=5 /><br />
+	Divide Lot Size minimums by: <input type="text" value="1.0" name="lot_factor" size=5 /> or eliminate lot size minimums: <input type="checkbox" name="lot" value="eliminate" /> <br />
+	Eliminate single family zoning limits (A-1, A-2): <input type="checkbox" name="singlefamily" value="a" /> <br />
+	Eliminate two family zoning limits (B): <input type="checkbox" name="twofamily" value="b" /> <br />
+	<input type="submit" value="Recompute" />
+</form>	

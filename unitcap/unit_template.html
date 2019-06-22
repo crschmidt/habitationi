@@ -1,0 +1,35 @@
+<h2>Changes</h2>
+<form>
+	Multiply FAR By: <input type="text" value="{{options.far_factor}}" name="far_factor" size=5 /> <b>OR</b> set explicit FAR maximum: <input type="text" value="{{options.far_explicit}}" name="far_explicit" size=5 /><br />
+	Divide Lot Size minimums by: <input type="text" value="1.0" name="lot_factor" size=5 /> <b>OR</b> set explicit lot size/unit minimum: <input type="text" value="{{options.lot_explicit}}" name="lot_explicit" size=5 /> <b>OR</b> eliminate lot size minimums: <input type="checkbox" name="lot" value="eliminate" {% if options.no_lot %}checked="checked"{% endif %}/> <br />
+	Eliminate single family zoning limits (A-1, A-2): <input type="checkbox" name="singlefamily" value="a" {% if options.no_a %}checked="checked"{% endif %}/> <br />
+	Eliminate two family zoning limits (B): <input type="checkbox" name="twofamily" value="b" {% if options.no_b %}checked="checked"{% endif %}/> <br />
+	<input type="submit" value="Recompute" />
+</form>	
+
+<h2>Results</h2>
+{% if changes %}
+If you {{changes}}, 
+{% else %} 
+If you change nothing, 
+{% endif %}
+the number of units allowed is {{unit_count}}{%if increase%}, an increase of {{increase}}{%endif%}.
+
+
+
+<h2>New dimensional tables</h2>
+
+<table width="50%">
+	<tr>
+		<th width="30%">
+			Zone
+		</th>
+		<th width="30%">
+			Floor Area Ratio Cap
+		</th>
+		<th width="30%">
+			Unit size/dwelling Cap
+		</th>
+	</tr>
+	{{table}}
+</table>
