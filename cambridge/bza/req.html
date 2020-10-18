@@ -1,15 +1,76 @@
+
+<html lang="en" xmlns:fb="http://ogp.me/ns/fb#" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8">
+   </head>
+<body>
 <h1>{{item['Application Number']}}</h1>
-Application Date: {{item['Application Date']}}<br />
-Address: {{item['Location']}}<br />
-<b>{{item['Summary For Publication']}}</b> <br />
-
-{{item['Literal Enforcement']}}
-
-<h3>Requested Relief</h3>
+<p>{{item['Description of Request']}}</p>
+<ul>
+<li>{{item['Type of Request']}}</li>
+<li>Application Date: {{item['Application Date']}}; Deadline: {{item['Special Permit Hearing Deadline']}}</li>
+<li>Address: {{item['Location']}}</li>
+<li>Zoning District: {{item['Zoning District']}}</li>
+<li>Status: {{item['Status of Request']}}</li>
+<li>Reason for Petition: {{item['Reason for Petition']}} {{item['Reason for Petition (Other)']}}</li>
+</ul>
+<h3>Relief Requested</h3>
 <ul>
 {% for z in zoning %}
   <li>{{z}}</li>
 {% endfor %}
+</ul>
+
+{% if item['Type of Request'] == "Variance" or item['Type of Request'] == "Variance/Special Permit" %}
+<h3>Variance Criteria</h3>
+{% endif %}
+<ul>
+{% if item['Literal Enforcement'] %}
+<li><b>A Literal enforcement of the provisions of this Ordinance would involve a
+substantial hardship, financial or otherwise, to the petitioner or appellant for
+the following reasons</b>: {{item['Literal Enforcement']}}</li>
+{% endif %}
+{% if item['Land Topography Hardship'] %}
+<li><b>The hardship is owing to the following circumstances relating to the soil
+conditions, shape or topography of such land or structures and especially
+affecting such land or structures but not affecting generally the zoning district
+in which it is located for the following reasons:</b> {{item['Land Topography Hardship']}}</li>
+{% endif %}
+{% if item['Desirable Relief Public Good'] %}
+<li><b>Desirable Relief May Be Granted without substantial detriment to the public good for the following reasons:</b> {{item['Desirable Relief Public Good']}}</li>
+{% endif %}
+{% if item['Desirable Relief Nullifying'] %}
+<li><b>Desirable Relief May Be Granted without nullifying or substantially derogating from the intent or purpose of this Ordinance for the following reasons:</b> {{item['Desirable Relief Nullifying']}}</li>
+{% endif %}
+</ul>
+<!-- Special Permit -->
+{% if item['Type of Request'] == "Special Permit"  or item['Type of Request'] == "Variance/Special Permit" %}
+<h3>Special Permit Criteria</h3>
+{% endif %}
+<ul>
+{% if item['Requirements Of Ordinance'] %}
+<li><b>Requirements of the Ordinance can or will be met for the following reasons:</b> {{item['Requirements Of Ordinance']}}</li>
+{% endif %}
+{% if item['TrafficPatterns'] %}
+<li><b>Traffic generated or patterns of access or egress would not cause congestion
+hazard, or substantial change in established neighborhood character for the
+following reasons: </b> {{item['TrafficPatterns']}}</li>
+{% endif %}
+{% if item['Continued Operation'] %}
+<li><b>The continued operation of or the development of adjacent uses as permitted in
+the Zoning Ordinance would not be adversely affected by the nature of the
+proposed use for the following reasons: </b> {{item['Continued Operation']}}</li>
+{% endif %}
+{% if item['Nuisance Or Hazard'] %}
+<li><b>Nuisance or hazard would not be created to the detriment of the health, safety
+and/or welfare of the occupant of the proposed use or the citizens of the City
+for the following reasons:</b> {{item['Nuisance Or Hazard']}}</li>
+{% endif %}
+{% if item['Other Reasons'] %}
+<li><b>For other reasons, the proposed use would not impair the integrity of the
+district or adjoining district or otherwise derogate from the intent or purpose
+of this ordinance for the following reasons:</b> {{item['Other Reasons']}}</li>
+{% endif %}
 </ul>
 
 <table>
@@ -28,5 +89,11 @@ Address: {{item['Location']}}<br />
  </tr>
 {% endfor %}
 </table>
+{% if item['Description of Other Occupancies'] %}
+<b>Other Occupancies:</b> {{item['Description of Other Occupancies']}}
+{% endif %}
 <br />
-{{all}}
+
+<!-- {{all}} -->
+</body>
+</html>

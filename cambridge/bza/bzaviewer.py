@@ -71,6 +71,12 @@ class myHandler(BaseHTTPRequestHandler):
         template = Template( d.read() )
         data = {'reqs':[]}
         for row in c.execute('SELECT * FROM bza order by "Application Number"'):
+            z = []
+            for i in range(1,7):
+                k = "Zoning Ordinance Cited Section (field%s)" % i
+                if row.get(k):
+                    z.append(row.get(k))
+            row['relief'] = ",".join(z)
             data['reqs'].append(row)
         s = template.render(**data)
         self.wfile.write(s)
@@ -126,6 +132,10 @@ def item_data(item):
         if item.get(k):
             zoning.append(item.get(k))
     data['zoning'] = zoning
+    for i in ['Requirements Of Ordinance','TrafficPatterns','Continued Operation','Nuisance Or Hazard','Other Reasons']:
+		if item.get(i, "").lower() == "n/a":
+			item[i] = ""
+
     return data
 
 def runweb(PORT_NUMBER):
