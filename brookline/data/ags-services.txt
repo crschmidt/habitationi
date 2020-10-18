@@ -1,0 +1,3 @@
+https://gisweb.brooklinema.gov/arcgis/rest/services/GPV/gpvzoning/MapServer/4|Buildings|0
+https://gisweb.brooklinema.gov/arcgis/rest/services/OpenDataPortal/OpenDataPortal_Address_Building_Parcel/MapServer/2|Parcels|0
+https://gisweb.brooklinema.gov/arcgis/rest/services/OpenDataPortal/OpenDataPortal/MapServer/11|Zoning|0

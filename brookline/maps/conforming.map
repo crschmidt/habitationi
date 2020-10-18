@@ -1,0 +1,57 @@
+MAP
+  NAME "MAPSERVER QUICKSTART"
+  EXTENT 743004.258741 2932621.904425 762800.132137 2953436.908704
+  UNITS FEET
+  SIZE 8000 6000
+
+  IMAGETYPE PNG24
+
+  PROJECTION
+    "init=epsg:2249"
+  END
+
+  WEB
+    METADATA
+      ows_enable_request "*"
+    END
+  END
+
+  LAYER
+    NAME "parcels"
+    STATUS ON
+    TYPE POLYGON
+    CONNECTIONTYPE OGR
+    CONNECTION "parcels.db"
+    DATA "ogrgeojson"
+    CLASSITEM "non_conform"
+    CLASS
+      EXPRESSION "1"
+      STYLE
+        COLOR 255 0 0
+        OUTLINECOLOR 0 0 0
+      END
+    END
+    CLASS
+      EXPRESSION "0"
+      STYLE
+        COLOR 0 0 255
+        OUTLINECOLOR 0 0 0
+      END
+    END
+    CLASS
+      EXPRESSION "-1"
+      STYLE
+        COLOR 190 190 190
+        OUTLINECOLOR 0 0 0
+      END
+    END
+    CLASS
+      EXPRESSION ""
+      STYLE
+        COLOR 190 190 190
+        OUTLINECOLOR 0 0 0
+      END
+    END
+  END
+
+END
