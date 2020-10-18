@@ -1,0 +1,32 @@
+<h1>{{item['Application Number']}}</h1>
+Application Date: {{item['Application Date']}}<br />
+Address: {{item['Location']}}<br />
+<b>{{item['Summary For Publication']}}</b> <br />
+
+{{item['Literal Enforcement']}}
+
+<h3>Requested Relief</h3>
+<ul>
+{% for z in zoning %}
+  <li>{{z}}</li>
+{% endfor %}
+</ul>
+
+<table>
+ <tr>
+   <td></td>
+   <th>Current</th>
+   <th>Requested</th>
+   <th>Allowed</th>
+ </tr>
+{% for r in requests %}
+ <tr>
+   <td>{% if r.change %}<b>{% endif %}{{r.label}}</b></td>
+   <td>{{r.existing}}</td>
+   <td>{{r.requested}}</td>
+   <td>{{r.ordinance}}</td>
+ </tr>
+{% endfor %}
+</table>
+<br />
+{{all}}
