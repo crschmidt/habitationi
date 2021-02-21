@@ -34,4 +34,5 @@ group by GISID;
 
 -- Create the table joining the parcel data with Geo data.
 create table meta_parcels as select * from lots LEFT JOIN parcels on lots.gisid = parcels.ml;
+alter table meta_parcels rename column impervious_mean to impervious_fraction;
 INSERT INTO geometry_columns VALUES ('meta_parcels', 'GEOMETRY', 0, 2, 4326, 'WKB');
