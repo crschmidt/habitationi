@@ -5,8 +5,8 @@ create table lots AS select min(PID) as pid,
  GISID as gisid,
  count(PID) as props_in_lot,
  count(distinct BldgNum) as buildings,
- sum(Interior_NumUnits) as units,
- sum(LandArea) as lot_size,
+ sum(CASE WHEN PropertyClass =='CONDOMINIUM' THEN 1 ELSE Interior_NumUnits END) as units,
+ max(LandArea) as lot_size,
  sum(Interior_LivingArea) as living_size,
  sum(Interior_Bedrooms) as bedrooms,
  address_only as address,
@@ -19,7 +19,16 @@ create table lots AS select min(PID) as pid,
  max(Exterior_NumStories) as num_stories,
  max(Exterior_WallHeight) as story_height,
  sum(Parking_Open)+sum(Parking_Covered)+sum(Parking_Garage) as parking_spaces,
- max(Zoning) as zone
+ max(Zoning) as zone,
+ null as gis_lot_size,
+ null as building_area,
+ null as driveway_area,
+ null as open_area,
+ null as height,
+ null as setback,
+ 0 as setback_nonconf,
+ '' as census,
+ '' as neighborhood
 from properties 
 group by GISID;
 

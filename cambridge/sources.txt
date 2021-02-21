@@ -1,3 +1,3 @@
-https://github.com/cambridgegis/cambridgegis_data/raw/master/Assessing/FY2021/FY2021_Parcels/ASSESSING_ParcelsFY2021.geojson
-https://github.com/cambridgegis/cambridgegis_data/raw/master/Basemap/Buildings/BASEMAP_Buildings.geojson
+https://github.com/cambridgegis/cambridgegis_data/raw/main/Assessing/FY2021/FY2021_Parcels/ASSESSING_ParcelsFY2021.geojson
+https://github.com/cambridgegis/cambridgegis_data/raw/main/Basemap/Buildings/BASEMAP_Buildings.geojson
 https://data.cambridgema.gov/api/views/aezj-8mpy/rows.csv?accessType=DOWNLOAD

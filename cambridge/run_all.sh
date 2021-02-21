@@ -20,9 +20,14 @@ rm $output
 rm -rf tmp
 
 mkdir tmp
-wget -O 'tmp/assess2020.csv' 'https://data.cambridgema.gov/api/views/aezj-8mpy/rows.csv?accessType=DOWNLOAD'
-wget -O 'tmp/parcels.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/master/Assessing/FY2021/FY2021_Parcels/ASSESSING_ParcelsFY2021.geojson'
+wget -O 'tmp/assess2021.csv' 'https://data.cambridgema.gov/api/views/k3sc-zkk7/rows.csv?accessType=DOWNLOAD'
+wget -O 'tmp/parcels.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Assessing/FY2021/FY2021_Parcels/ASSESSING_ParcelsFY2021.geojson'
+wget -O 'tmp/buildings.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Basemap/Buildings/BASEMAP_Buildings.geojson'
+wget -O 'tmp/driveways.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Basemap/Driveways/BASEMAP_Driveways.geojson'
+wget -O 'tmp/neighborhoods.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Boundary/CDD_Neighborhoods/BOUNDARY_CDDNeighborhoods.geojson'
+wget -O 'tmp/census_tracts.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Demographics/Census_2010/2010_Tracts/DEMOGRAPHICS_Tracts2010.geojson'
 ogr2ogr -append -f sqlite -nln parcels $output tmp/parcels.geojson
 cat updates.sql | sqlite3 $output
 cat data.sql | sqlite3 $output
+python compute_overlap.py
 ogr2ogr -f geojson meta_parcels.geojson $output meta_parcels
