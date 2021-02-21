@@ -26,7 +26,10 @@ wget -O 'tmp/buildings.geojson' 'https://github.com/cambridgegis/cambridgegis_da
 wget -O 'tmp/driveways.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Basemap/Driveways/BASEMAP_Driveways.geojson'
 wget -O 'tmp/neighborhoods.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Boundary/CDD_Neighborhoods/BOUNDARY_CDDNeighborhoods.geojson'
 wget -O 'tmp/census_tracts.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Demographics/Census_2010/2010_Tracts/DEMOGRAPHICS_Tracts2010.geojson'
-ogr2ogr -append -f sqlite -nln parcels $output tmp/parcels.geojson
+wget -O 'tmp/impervious_surface.topojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Environmental/Impervious_Surface/ENVIRONMENTAL_ImperviousSurface.topojson'
+gdal_rasterize -co "COMPRESS=LZW" -burn 1 -ts 32768 32768 -ot Byte tmp/impervious_surface.topojson tmp/impervious_surface.tiff
+qgis_process run native:zonalstatisticsfb --INPUT_RASTER=tmp/impervious_surface.tiff --RASTER_BAND=1 --INPUT=tmp/parcels.geojson --OUTPUT=tmp/parcels_impervious.geojson --COLUMN_PREFIX=impervious_ STATISTICS=2
+ogr2ogr -append -f sqlite -nln parcels $output tmp/parcels_impervious.geojson
 cat updates.sql | sqlite3 $output
 cat data.sql | sqlite3 $output
 python compute_overlap.py
