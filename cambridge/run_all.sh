@@ -30,4 +30,5 @@ ogr2ogr -append -f sqlite -nln parcels $output tmp/parcels.geojson
 cat updates.sql | sqlite3 $output
 cat data.sql | sqlite3 $output
 python compute_overlap.py
+python generate_conformance.py
 ogr2ogr -f geojson meta_parcels.geojson $output meta_parcels

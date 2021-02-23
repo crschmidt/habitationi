@@ -11,10 +11,12 @@ create table lots AS select min(PID) as pid,
  sum(Interior_Bedrooms) as bedrooms,
  address_only as address,
  min(PropertyClass) as type,
+ min(PropertyClass) as property_class,
  cast(sum(AssessedValue) as integer) as assessed_value,
  cast(sum(PropertyTaxAmount) as float) as tax,
  cast(CASE WHEN Condition_YearBuilt != '0' THEN min(cast(Condition_YearBuilt as integer)) ELSE -1 END as integer) as year_built,
  max(cast(substr(SALEDATE, -4) as integer)) as sale_year,
+ SALEDATE as sale_date,
  cast(sum(CASE WHEN PropertyClass != 'CONDO-BLDG' THEN SalePrice ELSE 0 END) as integer) as sale_price,
  max(Exterior_NumStories) as num_stories,
  max(Exterior_WallHeight) as story_height,
@@ -28,7 +30,9 @@ create table lots AS select min(PID) as pid,
  null as setback,
  0 as setback_nonconf,
  '' as census,
- '' as neighborhood
+ '' as neighborhood,
+ '' as nonconf_reasons,
+ 0 as nonconf
 from properties 
 group by GISID;
 

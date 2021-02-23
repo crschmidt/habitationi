@@ -178,11 +178,8 @@ def guess_units(row):
         return 2
     if row['property_class'] == 'SNGL-FAM-RES':
         return 1
-    if row['property_class'] == "CONDO-BLDG":
-        return int(row['props_in_lot']) - int(row['buildings'])
 
-    else:
-        return int(row['units'])
+    return int(row['units'])
 
 def guess_lot_size(row):
     lot_size, gis_lot_size = float(row.get('lot_size', 0) or 0), float(row.get('gis_lot_size', 0) or 0)
@@ -196,7 +193,7 @@ def guess_lot_size(row):
         return lot_size
     return 0
 
-def conforming(row):
+def conforming(row, l=False):
     types = {
             'A-1': ["SNGL-FAM-RES",'SINGLE FAM W/AUXILIARY APT'],
             'A-2': ["SNGL-FAM-RES",'SINGLE FAM W/AUXILIARY APT'],
@@ -294,7 +291,6 @@ def conforming(row):
     lot_size = guess_lot_size(row)
 
     zone = row['zone']
-
     units = guess_units(row)
     non_conforming = []
 
@@ -326,6 +322,10 @@ def conforming(row):
                 non_conforming.append("type")
             else:
                 non_conforming.append("property type")
+    if l:
+        if non_conforming:
+            return non_conforming
+        return []
     if non_conforming:
         return "Non-conforming (%s)." % (", ".join(non_conforming))
     return ""
@@ -335,12 +335,19 @@ def approx_height(row):
     if row['story_height']:
         height_approx = int(float(row['num_stories']) * int(row['story_height']))
         if row['height']:
+            if height_approx == 0 :
+                return row['height']
             height = float(row['height'])
             if height/height_approx > 4 or height/height_approx < .4:
                 return -1
     return height_approx
 
 def write_row(row):
+    # Convert new-style 2021 fields to old-style fields
+    if not 'setback_problem' in row:
+        row['setback_problem'] = row['setback_nonconf']
+    if not 'property_class' in row:
+        row['property_class'] = row['type']
     text = []
     zone = row.get('zone', '')
     single_building = int(row['buildings']) == 1 and int(row['props_in_lot']) == 1
@@ -350,7 +357,7 @@ def write_row(row):
             text.append("%s bedroom single family home." % (row['bedrooms']))
         else: 
             text.append("%s." % class_lookup[row['property_class']])
-    if row['year_built'] and int(row['year_built']) != 0:
+    if row['year_built'] and int(row['year_built']) != 0 and int(row['year_built']) != -1:
         text.append("Built %s." % (row['year_built']))
     if single_building and row['num_stories'] and float(row['num_stories']):
         h = approx_height(row)
@@ -394,7 +401,7 @@ def write_row(row):
     #text.append(row['prop_id'])
     gmaps_link = "https://www.google.com/maps/search/?api=1&query=%s" % urllib.quote("%s, Cambridge, MA" % row['address'])
     text.append(gmaps_link)
-    text.append("https://www.cambridgema.gov/propertydatabase/%s" % row['prop_id'])    
+    text.append("https://www.cambridgema.gov/propertydatabase/%s" % row['pid'])    
     #print " ".join(text)   
     t = " ".join(text)
     while len(t) > 284 + len(gmaps_link): # Hack for entries which are too long.
@@ -422,4 +429,4 @@ if __name__ == "__main__":
             m = len(t)
         if True: #len(t) > 306: 
             print(t)    
-    print m
+    #print m
