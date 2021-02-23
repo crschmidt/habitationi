@@ -228,6 +228,7 @@ def conforming(row, l=False):
     far['BB-1'] = 3.25
     far['SD-11'] = 1.7
     far['SD-15'] = 3.5
+    far['N'] = 1.25
 
     lot_area = {
             'A-1': 6000,
@@ -251,6 +252,7 @@ def conforming(row, l=False):
         lot_area[i] = 600
     for i in ['C-2A', 'C-3', 'C-3A', 'C-3B', 'BB', 'BB-1', 'BB-2', 'SD-1', 'SD-6', 'SD-7']:
         lot_area[i] = 300
+    lot_area['N'] = 500
         
     openspace = {}
     for i in ['SD-13', 'SD-12', 'SD-11', 'SD-8A', 'SD-5', 'SD-4A', 'SD-4', 'IB-2', 'BB-2', 'BB-1', 'O-2A', 'O-2', 'O-1', 'C-2B', 'C-2', 'C-1A']:
@@ -265,6 +267,7 @@ def conforming(row, l=False):
         openspace[i] = .4
     for i in ['C-1', 'BA-3', 'SD-14']:
         openspace[i] = .3
+    openspace['N'] = .25
 
     heights = {}
     for i in ['A-1', 'A-2', 'B', 'C', 'C-1', 'O-1', 'BA-1', 'BA-3', 'IB-2', 'OS', 'SD-2', 'SD-9', 'SD-10F', 'SD-10H', 'OS']:
@@ -287,6 +290,7 @@ def conforming(row, l=False):
     heights['SD-12'] = 65
     heights['SD-3'] = 70    
     heights['SD-6'] = 100 
+    heights['N'] = 40
 
     lot_size = guess_lot_size(row)
 
@@ -299,7 +303,7 @@ def conforming(row, l=False):
         if prop_far > far[zone]:
             non_conforming.append("density")
     if row['property_class'] in residential_classes and int(row['parking_spaces']):
-        if units > int(row['parking_spaces']):
+        if units > int(row['parking_spaces']) and zone != 'N':
             non_conforming.append("parking")
     if lot_size and zone in lot_area and units:
         sf_unit = float(lot_size) / units
@@ -424,6 +428,10 @@ if __name__ == "__main__":
     c.row_factory = dict_factory
     m = 0
     for row in c.execute("SELECT * FROM lots"):
+        if row['zone'] in ['A-1', 'A-2', 'B', 'C', 'C-1']:
+            row['zone'] = 'N'
+        if row['zone'] == 'N' and row['setback_nonconf']==1 and row['setback'] > 5:
+            row['setback_nonconf'] = 0
         t = write_row(row)
         if len(t)>m:
             m = len(t)

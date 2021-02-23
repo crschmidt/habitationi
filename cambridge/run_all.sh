@@ -31,4 +31,5 @@ cat updates.sql | sqlite3 $output
 cat data.sql | sqlite3 $output
 python compute_overlap.py
 python generate_conformance.py
+cat meta.sql | sqlite3 $output
 ogr2ogr -f geojson meta_parcels.geojson $output meta_parcels
