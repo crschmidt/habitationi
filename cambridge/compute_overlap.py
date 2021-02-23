@@ -70,7 +70,7 @@ def min_setback(parcel, buildings, sb=None):
     test_setbacks = range(0, 100)
     if sb: test_setbacks = [sb]
     if parcel.type != "MultiPolygon" and len(buildings):
-        for setback in range(0, 100):
+        for setback in test_setbacks:
             try:
                 lot = parcel.buffer(-setback)
                 if lot.area <= 0: break
