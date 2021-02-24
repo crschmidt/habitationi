@@ -178,11 +178,8 @@ def guess_units(row):
         return 2
     if row['property_class'] == 'SNGL-FAM-RES':
         return 1
-    if row['property_class'] == "CONDO-BLDG":
-        return int(row['props_in_lot']) - int(row['buildings'])
 
-    else:
-        return int(row['units'])
+    return int(row['units'])
 
 def guess_lot_size(row):
     lot_size, gis_lot_size = float(row.get('lot_size', 0) or 0), float(row.get('gis_lot_size', 0) or 0)
@@ -196,7 +193,7 @@ def guess_lot_size(row):
         return lot_size
     return 0
 
-def conforming(row):
+def conforming(row, l=False):
     types = {
             'A-1': ["SNGL-FAM-RES",'SINGLE FAM W/AUXILIARY APT'],
             'A-2': ["SNGL-FAM-RES",'SINGLE FAM W/AUXILIARY APT'],
@@ -231,6 +228,7 @@ def conforming(row):
     far['BB-1'] = 3.25
     far['SD-11'] = 1.7
     far['SD-15'] = 3.5
+    far['N'] = 1.25
 
     lot_area = {
             'A-1': 6000,
@@ -254,6 +252,7 @@ def conforming(row):
         lot_area[i] = 600
     for i in ['C-2A', 'C-3', 'C-3A', 'C-3B', 'BB', 'BB-1', 'BB-2', 'SD-1', 'SD-6', 'SD-7']:
         lot_area[i] = 300
+    lot_area['N'] = 500
         
     openspace = {}
     for i in ['SD-13', 'SD-12', 'SD-11', 'SD-8A', 'SD-5', 'SD-4A', 'SD-4', 'IB-2', 'BB-2', 'BB-1', 'O-2A', 'O-2', 'O-1', 'C-2B', 'C-2', 'C-1A']:
@@ -268,6 +267,7 @@ def conforming(row):
         openspace[i] = .4
     for i in ['C-1', 'BA-3', 'SD-14']:
         openspace[i] = .3
+    openspace['N'] = .25
 
     heights = {}
     for i in ['A-1', 'A-2', 'B', 'C', 'C-1', 'O-1', 'BA-1', 'BA-3', 'IB-2', 'OS', 'SD-2', 'SD-9', 'SD-10F', 'SD-10H', 'OS']:
@@ -290,11 +290,11 @@ def conforming(row):
     heights['SD-12'] = 65
     heights['SD-3'] = 70    
     heights['SD-6'] = 100 
+    heights['N'] = 40
 
     lot_size = guess_lot_size(row)
 
     zone = row['zone']
-
     units = guess_units(row)
     non_conforming = []
 
@@ -303,7 +303,7 @@ def conforming(row):
         if prop_far > far[zone]:
             non_conforming.append("density")
     if row['property_class'] in residential_classes and int(row['parking_spaces']):
-        if units > int(row['parking_spaces']):
+        if units > int(row['parking_spaces']) and zone != 'N':
             non_conforming.append("parking")
     if lot_size and zone in lot_area and units:
         sf_unit = float(lot_size) / units
@@ -326,6 +326,10 @@ def conforming(row):
                 non_conforming.append("type")
             else:
                 non_conforming.append("property type")
+    if l:
+        if non_conforming:
+            return non_conforming
+        return []
     if non_conforming:
         return "Non-conforming (%s)." % (", ".join(non_conforming))
     return ""
@@ -335,24 +339,30 @@ def approx_height(row):
     if row['story_height']:
         height_approx = int(float(row['num_stories']) * int(row['story_height']))
         if row['height']:
+            if height_approx == 0 :
+                return row['height']
             height = float(row['height'])
             if height/height_approx > 4 or height/height_approx < .4:
                 return -1
     return height_approx
 
 def write_row(row):
+    # Convert new-style 2021 fields to old-style fields
+    if not 'setback_problem' in row:
+        row['setback_problem'] = row['setback_nonconf']
+    if not 'property_class' in row:
+        row['property_class'] = row['type']
     text = []
     zone = row.get('zone', '')
-    single_building = int(row['buildings']) == 1 and int(row['props_in_lot']) == 1
     text.append("%s -" % row['address'])
     if row['property_class'] in class_lookup:
         if row['property_class'] == 'SNGL-FAM-RES' and row['bedrooms']:
             text.append("%s bedroom single family home." % (row['bedrooms']))
         else: 
             text.append("%s." % class_lookup[row['property_class']])
-    if row['year_built'] and int(row['year_built']) != 0:
+    if row['year_built'] and int(row['year_built']) != 0 and int(row['year_built']) != -1:
         text.append("Built %s." % (row['year_built']))
-    if single_building and row['num_stories'] and float(row['num_stories']):
+    if row['num_stories'] and float(row['num_stories']):
         h = approx_height(row)
         if h != -1:
             story_text = "%s stories" % row['num_stories']
@@ -363,42 +373,38 @@ def write_row(row):
                 text.append("%s; ~%s ft tall." % (story_text, h))
             else:
                 text.append("%s." % story_text) 
-    if single_building and row['units'] >= 3:
+    if row['units'] >= 3 or (row['units'] == 2 and row['type'] in ['CONDOMINIUM', 'CONDO-BLDG']):
         text.append("%s units." % row['units'])
-    if single_building and row['living_size']:
+    if row['living_size']:
         text.append("%s sqft." % simple_size(int(row['living_size'])))
     lot_size = guess_lot_size(row)
     if lot_size:
-        if row['driveway_area'] and int(row['driveway_area']) > 10:
-            text.append("%s sqft lot (%s sf driveway)." % (simple_size(lot_size), simple_size(int(row['driveway_area']))))
-        else:
-            text.append("%s sqft lot." % simple_size(lot_size))
-    if not single_building:
-        if int(row['buildings']) > 1:
-            text.append("%s buildings." % row['buildings'])
-        if int(row['props_in_lot']) > 1:
-            props = int(row['props_in_lot'])
-            if row['property_class'] == "CONDO-BLDG" and props > int(row['buildings']):
-                props = props - int(row['buildings'])
-            text.append("%s properties." % props)
-    if single_building and row['sale_date'] != "12/31/1899" and int(row['sale_price']) > 10000:
+        text.append("%s sqft lot." % simple_size(lot_size))
+    if row['type'] in ["CONDOMINIUM", "CONDO-BLDG"]:
+        if row['sale_year']:
+            text.append("Unit last sold: %s." % row['sale_year'])
+    elif row['sale_date'] != "12/31/1899" and int(row['sale_price']) > 10000:
         text.append("Last sold: %s, %s." % (row['sale_date'], short_price(int(row['sale_price']))))
     if int(row['assessed_value']):    
-        text.append("Current assessment: %s." % (short_price(int(row['assessed_value'])))) 
+        text.append("Assessment: %s." % (short_price(int(row['assessed_value'])))) 
     conforms = conforming(row)    
     if conforms:
         text.append(conforms)
-    #print ",".join([str(row['gisid']),str(conforms and 1 or 0)])    
     if zone in special_zones:
         text.append("%s." % (special_zones[zone]))
-    #text.append(row['prop_id'])
+    if conforms and 'n_nonconf' in row:
+        if row['zone'] in ['A-1', 'A-2', 'B', 'C', 'C-1']:
+            if row['n_nonconf'] == 0:
+                text.append("Legal under MMH.")
+            elif row['n_nonconf'] == 1 and row['n_nonconf_reasons'] == "setbacks" and row['nonconf_reasons'] != "setbacks":
+                text.append("Legal under MMH (except setbacks).")
+
     gmaps_link = "https://www.google.com/maps/search/?api=1&query=%s" % urllib.quote("%s, Cambridge, MA" % row['address'])
     text.append(gmaps_link)
-    text.append("https://www.cambridgema.gov/propertydatabase/%s" % row['prop_id'])    
-    #print " ".join(text)   
+    text.append("https://www.cambridgema.gov/propertydatabase/%s" % row['pid'])    
     t = " ".join(text)
     while len(t) > 284 + len(gmaps_link): # Hack for entries which are too long.
-        text.pop(-4)
+        text.pop(-5)
         t = " ".join(text)   
     return t
     
@@ -417,9 +423,10 @@ if __name__ == "__main__":
     c.row_factory = dict_factory
     m = 0
     for row in c.execute("SELECT * FROM lots"):
+    #    if row['pid'] != '5657': continue
         t = write_row(row)
         if len(t)>m:
             m = len(t)
         if True: #len(t) > 306: 
             print(t)    
-    print m
+    #print m
