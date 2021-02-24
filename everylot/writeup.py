@@ -354,7 +354,6 @@ def write_row(row):
         row['property_class'] = row['type']
     text = []
     zone = row.get('zone', '')
-    single_building = int(row['buildings']) == 1 and int(row['props_in_lot']) == 1
     text.append("%s -" % row['address'])
     if row['property_class'] in class_lookup:
         if row['property_class'] == 'SNGL-FAM-RES' and row['bedrooms']:
@@ -363,7 +362,7 @@ def write_row(row):
             text.append("%s." % class_lookup[row['property_class']])
     if row['year_built'] and int(row['year_built']) != 0 and int(row['year_built']) != -1:
         text.append("Built %s." % (row['year_built']))
-    if single_building and row['num_stories'] and float(row['num_stories']):
+    if row['num_stories'] and float(row['num_stories']):
         h = approx_height(row)
         if h != -1:
             story_text = "%s stories" % row['num_stories']
@@ -374,42 +373,38 @@ def write_row(row):
                 text.append("%s; ~%s ft tall." % (story_text, h))
             else:
                 text.append("%s." % story_text) 
-    if single_building and row['units'] >= 3:
+    if row['units'] >= 3 or (row['units'] == 2 and row['type'] in ['CONDOMINIUM', 'CONDO-BLDG']):
         text.append("%s units." % row['units'])
-    if single_building and row['living_size']:
+    if row['living_size']:
         text.append("%s sqft." % simple_size(int(row['living_size'])))
     lot_size = guess_lot_size(row)
     if lot_size:
-        if row['driveway_area'] and int(row['driveway_area']) > 10:
-            text.append("%s sqft lot (%s sf driveway)." % (simple_size(lot_size), simple_size(int(row['driveway_area']))))
-        else:
-            text.append("%s sqft lot." % simple_size(lot_size))
-    if not single_building:
-        if int(row['buildings']) > 1:
-            text.append("%s buildings." % row['buildings'])
-        if int(row['props_in_lot']) > 1:
-            props = int(row['props_in_lot'])
-            if row['property_class'] == "CONDO-BLDG" and props > int(row['buildings']):
-                props = props - int(row['buildings'])
-            text.append("%s properties." % props)
-    if single_building and row['sale_date'] != "12/31/1899" and int(row['sale_price']) > 10000:
+        text.append("%s sqft lot." % simple_size(lot_size))
+    if row['type'] in ["CONDOMINIUM", "CONDO-BLDG"]:
+        if row['sale_year']:
+            text.append("Unit last sold: %s." % row['sale_year'])
+    elif row['sale_date'] != "12/31/1899" and int(row['sale_price']) > 10000:
         text.append("Last sold: %s, %s." % (row['sale_date'], short_price(int(row['sale_price']))))
     if int(row['assessed_value']):    
-        text.append("Current assessment: %s." % (short_price(int(row['assessed_value'])))) 
+        text.append("Assessment: %s." % (short_price(int(row['assessed_value'])))) 
     conforms = conforming(row)    
     if conforms:
         text.append(conforms)
-    #print ",".join([str(row['gisid']),str(conforms and 1 or 0)])    
     if zone in special_zones:
         text.append("%s." % (special_zones[zone]))
-    #text.append(row['prop_id'])
+    if conforms and 'n_nonconf' in row:
+        if row['zone'] in ['A-1', 'A-2', 'B', 'C', 'C-1']:
+            if row['n_nonconf'] == 0:
+                text.append("Legal under MMH.")
+            elif row['n_nonconf'] == 1 and row['n_nonconf_reasons'] == "setbacks" and row['nonconf_reasons'] != "setbacks":
+                text.append("Legal under MMH (except setbacks).")
+
     gmaps_link = "https://www.google.com/maps/search/?api=1&query=%s" % urllib.quote("%s, Cambridge, MA" % row['address'])
     text.append(gmaps_link)
     text.append("https://www.cambridgema.gov/propertydatabase/%s" % row['pid'])    
-    #print " ".join(text)   
     t = " ".join(text)
     while len(t) > 284 + len(gmaps_link): # Hack for entries which are too long.
-        text.pop(-4)
+        text.pop(-5)
         t = " ".join(text)   
     return t
     
@@ -428,10 +423,7 @@ if __name__ == "__main__":
     c.row_factory = dict_factory
     m = 0
     for row in c.execute("SELECT * FROM lots"):
-        if row['zone'] in ['A-1', 'A-2', 'B', 'C', 'C-1']:
-            row['zone'] = 'N'
-        if row['zone'] == 'N' and row['setback_nonconf']==1 and row['setback'] > 5:
-            row['setback_nonconf'] = 0
+    #    if row['pid'] != '5657': continue
         t = write_row(row)
         if len(t)>m:
             m = len(t)
