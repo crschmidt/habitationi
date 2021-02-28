@@ -122,6 +122,11 @@ def main():
             continue
         gisid = parcel['properties']['ML']
         lot = shapely.geometry.shape(fiona.transform.transform_geom('EPSG:4326', 'EPSG:2249', parcel['geometry']))
+        bbox_str = None
+        try:
+            bbox_str = ",".join(map(lambda x: "%i" % x, lot.bounds))
+        except:
+            pass
         intersects = 0
         area = 0
         driveway_area = 0
@@ -184,6 +189,8 @@ def main():
             db.execute("UPDATE lots SET census=? WHERE gisid=?", (census, gisid))
         if neighborhood:
             db.execute("UPDATE lots SET neighborhood=? WHERE gisid=?", (neighborhood, gisid))
+        if bbox_str:
+            db.execute("UPDATE lots SET bbox=? WHERE gisid=?", (bbox_str, gisid))
             
 
         db.execute("UPDATE lots SET gis_lot_size=? WHERE gisid=?", (int(lot.area), gisid))
