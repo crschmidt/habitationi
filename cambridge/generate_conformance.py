@@ -13,13 +13,20 @@ def main():
     c = db.cursor()
     c.row_factory = dict_factory
     conform = []
+    lot_units = []
     for row in c.execute("SELECT * FROM lots"):
         row['setback_problem'] = row['setback_nonconf']
         row['property_class'] = row['type']
         conf = writeup.conforming(row, l=True)
         conform.append([",".join(conf), row['pid']])
+        units = writeup.allowed_lot_units(row)
+        lot_units.append([units, row['pid']])
+        units = min(units, 9) 
+        byright_units.append([units, row['pid']])
     print "Updating db"
     db.executemany("UPDATE lots SET nonconf_reasons=? WHERE PID=?", conform)
+    db.executemany("UPDATE lots SET allowed_units=? WHERE PID=?", lot_units)
+    db.executemany("UPDATE lots SET byright_units=? WHERE PID=?", lot_units)
     print ("Committing")
     db.commit()
     db.execute("UPDATE lots SET nonconf=1 where nonconf_reasons!=''")

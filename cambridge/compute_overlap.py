@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+TEST_MODE=0
+
 import sys
 try:
     import fiona
@@ -117,6 +119,7 @@ def main():
     parcels = fiona.open("tmp/parcels.geojson")
     done = 0
     outputs = []
+    building_lot_map = {}
     for parcel in parcels:
         if parcel['properties']['ML'] == "---":
             continue
@@ -138,7 +141,13 @@ def main():
             try:
                 if lot.intersects(i):
                     intersects += 1
-                    intersect_area = lot.intersection(i).area 
+                    intersect_area = lot.intersection(i).area
+                    if props.get("BldgID"):
+                        bid = props.get("BldgID")
+                        if not bid in building_lot_map:
+                            building_lot_map[bid] = []
+                        building_lot_map[bid].append((gisid, intersect_area))
+
                     area += intersect_area
                     if intersect_area/i.area > OVERLAP_THRESHOLD:
                         if props['TYPE'] != 'OUTBLDG':
@@ -195,9 +204,17 @@ def main():
 
         db.execute("UPDATE lots SET gis_lot_size=? WHERE gisid=?", (int(lot.area), gisid))
         done += 1
-        if done % 100 == 0: 
+        if done % 250 == 0: 
             db.commit()
             print done
+            if TEST_MODE: break
+    bldg_gisids = []
+    for bldg, data in building_lot_map.items():
+        if len(data) > 1:
+            data.sort(key = lambda x: x[1], reverse=True) 
+        bldg_gisids.append([data[0][0], bldg])
+    db.executemany("UPDATE buildings SET gisid=? WHERE bldgid=?", bldg_gisids)
+    db.commit()
 
 if __name__ == "__main__":
     main()

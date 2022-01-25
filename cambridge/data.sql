@@ -34,6 +34,8 @@ create table lots AS select min(PID) as pid,
  0 as nonconf,
  '' as n_nonconf_reasons,
  0 as n_nonconf,
+ 0 as allowed_units,
+ 0 as byright_units,
  null as bbox
 from properties 
 group by GISID;
