@@ -193,6 +193,46 @@ def guess_lot_size(row):
         return lot_size
     return 0
 
+def zone_lot_area():
+    lot_area = {
+            'A-1': 6000,
+            'A-2': 4500,
+            'C-1A': 1000,
+            'BC': 500,
+            'BC-1': 450,
+            'IA-1': 700,
+            'SD-8': 650,
+            'SD-14': 800,
+        }
+    for i in ['IB-2', 'BA-1']:
+        lot_area[i] = 1200
+    for i in ['B', 'SD-2', 'SD-3']:
+        lot_area[i] = 2500
+    for i in ['C', 'SD-10F', 'SD-10H', 'SD-9']:
+        lot_area[i] = 1800
+    for i in ['C-1', 'BA-3']:
+        lot_area[i] = 1500
+    for i in ['C-2', 'C-2B', 'O-2', 'BA', 'BA-2', 'SD-4', 'SD-4A', 'SD-5', 'SD-11', 'SD-13']:
+        lot_area[i] = 600
+    for i in ['C-2A', 'C-3', 'C-3A', 'C-3B', 'BB', 'BB-1', 'BB-2', 'SD-1', 'SD-6', 'SD-7']:
+        lot_area[i] = 300
+    lot_area['N'] = 500
+    return lot_area
+
+def allowed_lot_units(row):
+    lot_size = guess_lot_size(row)
+    if lot_size == 0: return 0 
+    zone = row['zone']
+    lot_area = zone_lot_area().get(zone, 1000)
+    if zone in ('A-1', 'A-2'):
+        return 1
+    if zone == 'OS':
+        return 0
+    allowed = max(int(float(lot_size)/lot_area), 1)
+    if zone == "B":
+        return min(allowed, 2)
+    return allowed
+
 def conforming(row, l=False):
     types = {
             'A-1': ["SNGL-FAM-RES",'SINGLE FAM W/AUXILIARY APT'],
@@ -230,29 +270,7 @@ def conforming(row, l=False):
     far['SD-15'] = 3.5
     far['N'] = 1.25
 
-    lot_area = {
-            'A-1': 6000,
-            'A-2': 4500,
-            'C-1A': 1000,
-            'BC': 500,
-            'BC-1': 450,
-            'IA-1': 700,
-            'SD-8': 650,
-            'SD-14': 800,
-        }
-    for i in ['IB-2', 'BA-1']:
-        lot_area[i] = 1200
-    for i in ['B', 'SD-2', 'SD-3']:
-        lot_area[i] = 2500
-    for i in ['C', 'SD-10F', 'SD-10H', 'SD-9']:
-        lot_area[i] = 1800
-    for i in ['C-1', 'BA-3']:
-        lot_area[i] = 1500
-    for i in ['C-2', 'C-2B', 'O-2', 'BA', 'BA-2', 'SD-4', 'SD-4A', 'SD-5', 'SD-11', 'SD-13']:
-        lot_area[i] = 600
-    for i in ['C-2A', 'C-3', 'C-3A', 'C-3B', 'BB', 'BB-1', 'BB-2', 'SD-1', 'SD-6', 'SD-7']:
-        lot_area[i] = 300
-    lot_area['N'] = 500
+    lot_area = zone_lot_area()
         
     openspace = {}
     for i in ['SD-13', 'SD-12', 'SD-11', 'SD-8A', 'SD-5', 'SD-4A', 'SD-4', 'IB-2', 'BB-2', 'BB-1', 'O-2A', 'O-2', 'O-1', 'C-2B', 'C-2', 'C-1A']:
