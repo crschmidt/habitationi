@@ -21,7 +21,7 @@ rm -rf tmp
 
 mkdir tmp
 wget -O 'tmp/assess2022.csv' 'https://data.cambridgema.gov/api/views/v2zs-xwpu/rows.csv?accessType=DOWNLOAD'
-wget -O 'tmp/parcels.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Assessing/FY2022/FY2022_Parcels/ASSESSING_ParcelsFY2021.geojson'
+wget -O 'tmp/parcels.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Assessing/FY2022/FY2022_Parcels/ASSESSING_ParcelsFY2022.geojson'
 wget -O 'tmp/buildings.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Basemap/Buildings/BASEMAP_Buildings.geojson'
 wget -O 'tmp/driveways.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Basemap/Driveways/BASEMAP_Driveways.geojson'
 wget -O 'tmp/neighborhoods.geojson' 'https://github.com/cambridgegis/cambridgegis_data/raw/main/Boundary/CDD_Neighborhoods/BOUNDARY_CDDNeighborhoods.geojson'

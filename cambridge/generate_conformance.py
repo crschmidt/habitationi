@@ -14,6 +14,7 @@ def main():
     c.row_factory = dict_factory
     conform = []
     lot_units = []
+    byright_units = []
     for row in c.execute("SELECT * FROM lots"):
         row['setback_problem'] = row['setback_nonconf']
         row['property_class'] = row['type']
@@ -26,7 +27,7 @@ def main():
     print "Updating db"
     db.executemany("UPDATE lots SET nonconf_reasons=? WHERE PID=?", conform)
     db.executemany("UPDATE lots SET allowed_units=? WHERE PID=?", lot_units)
-    db.executemany("UPDATE lots SET byright_units=? WHERE PID=?", lot_units)
+    db.executemany("UPDATE lots SET byright_units=? WHERE PID=?", byright_units)
     print ("Committing")
     db.commit()
     db.execute("UPDATE lots SET nonconf=1 where nonconf_reasons!=''")

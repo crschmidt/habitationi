@@ -154,8 +154,8 @@ def main():
                             intersect_buildings.append(i)
                         if props['TOP_GL'] > max_height:
                             max_height = props['TOP_GL']
-            except:
-                print "Invalid geometry on %s" % gisid
+            except Exception, E:
+                print "Invalid geometry on %s (%s)" % (gisid, E)
         approx_setback = min_setback(lot, intersect_buildings)
         allowed_sb = get_lot_allowed_setback(db, gisid, max_height)
         if allowed_sb:
@@ -166,16 +166,16 @@ def main():
                 if lot.intersects(i):
                     intersects += 1
                     driveway_area += lot.intersection(i).area
-            except:
-                print "Invalid geometry on %s" % gisid
+            except Exception, E:
+                print "Invalid geometry on %s (%s)" % (gisid, E)
         
         census = "" 
         for geom, props in census_shapes:
             try:
                 if lot.intersects(geom):
-                    census = props['TRACTCE10']
-            except:
-                print "Invalid geometry on %s" % gisid
+                    census = props['TRACTCE20']
+            except Exception, E:
+                print "Invalid geometry on %s (%s)" % (gisid, E)
 
         neighborhood = "" 
         for geom, props in neighborhood_shapes:
