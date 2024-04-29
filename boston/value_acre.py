@@ -41,4 +41,4 @@ geojson = pdk.Layer(
 
 r = pdk.Deck(layers=[geojson], initial_view_state=INITIAL_VIEW_STATE)
 
-r.to_html("geojson_layer.html")
+r.to_html("taxval.html")
