@@ -1,0 +1,42 @@
+Based on the automated assessment of nonconforming parcel status, we can
+evaluate each lot based on it conforming with a lenient definition of zoning,
+including FAR, open space, units per lot area, and the least restrictive
+setback dimension. This will not provide a full evaluation of zoning, but
+it gives a good appromxation. Here we include an example SQL query against
+the data that shows the nonconforming percentage in each of the primarily
+residential districts in the city.
+
+select zone, nonconf as nonconforming, count(*) as lots, sum(units) as units from lots where zone in ('A-1', 'A-2', 'B', 'C', 'C-1') group by 1, 2 order by 1, 2;
+
+zone,nonconforming,lots,units
+A-1,0,52,41
+A-1,1,296,351
+A-2,0,124,118
+A-2,1,525,788
+B,0,255,293
+B,1,3649,8403.0
+C,0,36,43
+C,1,792,2381.0
+C-1,0,314,389.0
+C-1,1,4429,16052.0
+
+
+A-1:
+  Nonconforming Lot %age: 85%
+  Nonconforming units %age: 89%
+
+A-2: 
+  Nonconforming Lot %age: 81%
+  Nonconforming Unit %age: 87%
+
+B:
+  Nonconforming Lot %age: 93%
+  Nonconforming Unit %age: 96%
+
+C:
+  Nonconforming Lot %age: 96%
+  Nonconforming Unit %age: 98%
+
+C-1:
+  Nonconforming Lot %age: 93%
+  Nonconforming Unit %age: 98%
