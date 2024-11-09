@@ -22,21 +22,31 @@ C-1,1,4429,16052.0
 
 
 A-1:
+ Parcels: 348
+ Units: 392
   Nonconforming Lot %age: 85%
   Nonconforming units %age: 89%
 
 A-2: 
+  Parcels: 649
+  Units: 906
   Nonconforming Lot %age: 81%
   Nonconforming Unit %age: 87%
 
 B:
+  Parcels: 3904
+  Units: 8696
   Nonconforming Lot %age: 93%
   Nonconforming Unit %age: 96%
 
 C:
+  Parcels: 828
+  Units: 2424
   Nonconforming Lot %age: 96%
   Nonconforming Unit %age: 98%
 
 C-1:
+  Parcels: 4743
+  Units: 16441
   Nonconforming Lot %age: 93%
   Nonconforming Unit %age: 98%
